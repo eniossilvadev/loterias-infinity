@@ -18,7 +18,7 @@
 > - **Corrigir e migrar** — bug conhecido; a correção é decidida e registrada
 >   no ato da migração, não silenciosamente.
 
-Legenda de status: 🔲 Pendente · 🟡 Em andamento · ✅ Concluído
+Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (`_to_delete/`) · ✅ Concluído
 
 ---
 
@@ -110,9 +110,9 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · ✅ Concluído
 | 23 classes em `filtro/*` | Migrar (F2) | 🔲 | Cadeia de filtros — vira lista componível na plataforma nova |
 | ~45 classes de pontuador (`pontuador/*`, `config/pontuador/*`, `duplasena/*`, `pontuador/lotomania/*`) | Migrar (F2) | 🔲 | Tabelas acertos→pontos — viram dados de config, não código |
 | `ShiftBy` | Migrar (F2) | 🔲 | Pós-processador — shift circular |
-| `ShiftByNew` | Arquivar | 🔲 | Duplicata byte a byte de `ShiftBy` |
+| `ShiftByNew` | Arquivar | 🗄️ | Duplicata byte a byte de `ShiftBy` (movido para quarentena) |
 | `PositionalReplacement` | Migrar (F2) | 🔲 | Pós-processador — substituição posicional |
-| `PositionalReplacementNew` | Arquivar | 🔲 | Duplicata byte a byte |
+| `PositionalReplacementNew` | Arquivar | 🗄️ | Duplicata byte a byte (movido para quarentena) |
 | `Quadrantes*` (Lotofácil/Mega/Quina/DuplaSena/Lotomania) + `Rotacao` | Migrar (F2) | 🔲 | Motor de geração por quadrantes — 1 implementação parametrizada por loteria |
 | `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2) | 🔲 | Superclasses comuns — viram a base do pipeline novo |
 | `conferator/*` (11 classes) | Migrar (F4) | 🔲 | Conferência v2 — mais completa, vira o conferidor único |
@@ -135,13 +135,14 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · ✅ Concluído
 | `download.ArquivoUtil` | Arquivar | 🔲 | Versão antiga, usada só por `ZipUtil` |
 | `ArquivoLeitorUtil` / `ArquivoEscritorUtil` | Migrar (F2) | 🔲 | Reescrita moderna (NIO, UTF-8) já existe — ironicamente pouco usada; deve virar a base |
 | `commons-loterias.util.ListUtil` (74 imports) | Corrigir e migrar (F2) | 🔲 | **Bug confirmado:** parâmetro `incluir` é ignorado em `completarExcluirIncluir` — decidir e registrar se a correção muda comportamento observável |
-| `commons-loterias.util.ListUtil2` | Arquivar | 🔲 | Versão antiga morta, contém loop vazio e possível loop infinito |
+| `commons-loterias.util.ListUtil2` | Arquivar | 🗄️ | Versão antiga morta, contém loop vazio e possível loop infinito (movido para quarentena) |
 | `commons-core util.ListaUtils` | Absorver | 🔲 | `iterateStream` duplicado com `ListUtil` |
-| `commons-loterias.util.LotoUtil` | Arquivar | 🔲 | Código morto — `maiorSequencia` retorna `null` |
+| `commons-loterias.util.LotoUtil` | Arquivar | 🗄️ | Código morto — `maiorSequencia` retorna `null` (movido para quarentena) |
 | `commons-loterias.util.MathUtil` | Migrar (F2) | 🔲 | Paridade — reescrever em Stream Java 8+ no lugar de commons-collections 3.x |
 | `commons-loterias.util.ImprimirUtil` | Arquivar/Reescrever | 🔲 | Estado estático mutável — vira formatador puro |
 | `commons-core util.ZipUtil` | Migrar (F1, se necessário) | 🔲 | Só relevante se algum fluxo de ZIP sobreviver; provavelmente obsoleto após API |
-| `commons-core properties.PropertiesUtil` + `download.PropertiesUtil` | Arquivar | 🔲 | Carregam `config.properties` inexistente — substituídos pelo catálogo de parâmetros declarativo |
+| `commons-core properties.PropertiesUtil` + `download.PropertiesUtil` | Arquivar | 🗄️ | Carregam `config.properties` inexistente — substituídos pelo catálogo de parâmetros declarativo (movido para quarentena) |
+| `super-loterias-2025 config.ListOfListComparator` + `ListOfListComparator2` | Absorver | 🔲 | Par duplicado real (não código morto): `ListOfListComparator` é usado por ~30 classes incl. os flagships; `ListOfListComparator2` só por `diversos/LotoUtils.java`. Unificar numa única implementação na F2 |
 
 ## 8. Mappers e parsing HTML (candidatos fortes a arquivamento total)
 
@@ -150,23 +151,37 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · ✅ Concluído
 | `model.mapper.GenericMapper` | Arquivar | 🔲 | Parsing HTML por offsets mágicos, sem teste; grava debug em `E:\loterias\retorno.txt`. **Substituído pela ingestão via API (F1)** |
 | `model.mapper.*Mapper` (Lotofácil, Mega, Quina, Timemania, Lotomania, DuplaSena) | Arquivar | 🔲 | Todos dependem do `GenericMapper` acima |
 | `commons-loterias.controller.DuplaSenaRN` / `RNS1` / `RNS2` | Corrigir e arquivar | 🔲 | Bug confirmado: usa `LotofacilMapper` por engano; `S1`/`S2` retornam o mesmo resultado — registrar antes de descartar (pode ter mascarado comportamento em produção) |
-| `controller.LotofacilRN` / `MegaSenalRN` / `QuinaRN` / `TimemaniaRN` | Arquivar (2 já mortas) | 🔲 | `MegaSenalRN` e `QuinaRN` já sem nenhuma referência hoje |
-| `controller.CopyOfLotofacilRN` | Arquivar | 🔲 | Zero referências, `aplicarFiltro2` com corpo vazio |
+| `controller.LotofacilRN` / `TimemaniaRN` | Arquivar (F1, junto com o parsing HTML) | 🔲 | Ainda referenciadas pelo pipeline atual — só arquivam quando a ingestão via API substituir o parsing HTML |
+| `controller.MegaSenalRN` / `QuinaRN` | Arquivar | 🗄️ | Já sem nenhuma referência hoje — movidas para quarentena |
+| `controller.CopyOfLotofacilRN` | Arquivar | 🗄️ | Zero referências, `aplicarFiltro2` com corpo vazio (movido para quarentena) |
 | `util.ZipUtil` (parsing) + `.zip` da Caixa | Arquivar | 🔲 | Fluxo de download manual + unzip morre com a API |
 
 ## 9. Limpeza garantida (zero referências — ver seção 07 do relatório)
 
+> **Atualizado em 2026-09-12:** todos os itens confirmados foram movidos
+> para `_to_delete/` (pasta local, ignorada pelo Git — ver
+> `_to_delete/README.md`) em vez de apagados diretamente. Ficam em
+> quarentena até o expurgo definitivo na F6. O histórico do Git já preserva
+> o conteúdo original de qualquer forma.
+
 | Item | Ação | Status |
 |---|---|---|
-| Módulo `commons` (vazio, só `pom.xml`) | Remover | 🔲 |
-| `commons-core` download/{Combination, DesdobramentoUtil, PropertiesUtil} | Remover | 🔲 |
-| `commons-core` math/{Combination, DesdobramentoUtil}, properties/PropertiesUtil | Remover | 🔲 |
-| `commons-loterias`: `CopyOfLotofacilRN`, `MegaSenalRN`, `QuinaRN`, `ListUtil2`, `LotoUtil` | Remover | 🔲 |
-| `super-loterias-2025`: `ShiftByNew`, `PositionalReplacementNew`, `ListOfListComparator2`, `Constantes` (enum vazio), `GeradorBingoDaSorteIf` (interface vazia) | Remover | 🔲 |
-| `.class` órfãos em `src/main/java/.../money/lotomania/` | Remover | 🔲 |
-| `src/tmp.xml` (0 bytes), `src/main/resources/temp.json` (nunca lido) | Remover | 🔲 |
-| Pasta `testes/` (não compila como teste JUnit) | Remover ou mover para `src/test` real (F2) | 🔲 |
-| Dependências `commons-io` e `pdfbox` (declaradas, nunca importadas) | Remover do `pom.xml` raiz | 🔲 |
+| Módulo `commons` (vazio, só `pom.xml`) | Movido para quarentena; removido de `<modules>` do pom raiz | 🗄️ |
+| `commons-core` download/{Combination, DesdobramentoUtil, PropertiesUtil} | Movido para quarentena | 🗄️ |
+| `commons-core` math/{Combination, DesdobramentoUtil}, properties/PropertiesUtil | Movido para quarentena | 🗄️ |
+| `commons-loterias`: `CopyOfLotofacilRN`, `MegaSenalRN`, `QuinaRN`, `ListUtil2`, `LotoUtil` | Movido para quarentena | 🗄️ |
+| `super-loterias-2025`: `ShiftByNew`, `PositionalReplacementNew`, `Constantes` (enum vazio), `GeradorBingoDaSorteIf` (interface vazia) | Movido para quarentena | 🗄️ |
+| `.class` órfãos em `src/main/java/.../money/lotomania/` | Movido para quarentena | 🗄️ |
+| `src/tmp.xml` (0 bytes), `src/main/resources/temp.json` (nunca lido) | Movido para quarentena | 🗄️ |
+| Pasta `testes/` (não compila como teste JUnit) | Movido para quarentena (decisão de recriar em `src/test` real fica para F2) | 🗄️ |
+| Dependências `commons-io` e `pdfbox` (declaradas, nunca importadas) | Removidas do `dependencyManagement` do `pom.xml` raiz | ✅ |
+| Dependência `e2s-commons` em `commons-loterias/pom.xml` | Removida (apontava para o módulo `commons`, agora em quarentena) | ✅ |
+
+### Correção: item que **não** era código morto
+
+| Item | Correção | Novo destino |
+|---|---|---|
+| `super-loterias-2025.config.ListOfListComparator2` | Verificação encontrou uso real em `diversos/LotoUtils.java` (`theList.sort(new ListOfListComparator2())`). **Não foi movido.** | Ver linha correspondente na seção 7 — é a segunda metade de um par duplicado com `ListOfListComparator` (usado por ~30 classes, incl. `SuperLotofacil2026` e `SuperMega2025/2026`); destino correto é **Absorver** na F2, não arquivar |
 
 ---
 

@@ -45,3 +45,9 @@ build/
 jacoco.exec
 coverage/
 surefire-reports/
+
+# Quarentena de limpeza (Operacao Legadao / F0-F6): arquivos movidos aqui
+# antes do expurgo definitivo. Nao precisa ir para o remoto - o historico
+# do Git ja preserva o conteudo original de qualquer jeito. Ver
+# MATRIZ-RASTREABILIDADE.md.
+_to_delete/

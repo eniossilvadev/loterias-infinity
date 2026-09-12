@@ -32,11 +32,8 @@
       <artifactId>commons-core</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>br.com.silva.enio.loterias</groupId>
-      <artifactId>e2s-commons</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
+    <!-- e2s-commons removido em 2026-09-12: módulo vazio (sem classes),
+         movido para _to_delete/commons/. -->
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
