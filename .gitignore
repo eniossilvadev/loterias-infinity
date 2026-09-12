@@ -1,0 +1,47 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# Bytecode compilado (nao deve ser versionado em nenhuma hipotese)
+*.class
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos de build
+build/
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.swp
+*~
+
+# Arquivos de sistema
+*.lock
+*.orig
+
+# Arquivos gerados por cobertura ou testes
+jacoco.exec
+coverage/
+surefire-reports/
