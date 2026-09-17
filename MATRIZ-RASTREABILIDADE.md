@@ -150,10 +150,12 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 | `PositionalReplacementNew` | Arquivar | 🗄️ | Duplicata byte a byte (movido para quarentena) |
 | `Quadrantes*` (Lotofácil/Mega/Quina/DuplaSena/Lotomania) + `Rotacao` | Migrar (F2) | ✅ | `nucleo/quadrantes.py` — quadrantes fixos verificados linha a linha contra o Java (Dupla Sena confirmadamente irregular: 13/12/13/12); Lotomania calculada (fórmula par/ímpar de terminação). `Rotacao.getList` portado com simplificação de eficiência sem mudar distribuição (`rng.choice` em vez de embaralhar a lista inteira) |
 | `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2/F3) | ✅ | Absorvidas: `nucleo/selecao.py` (filtrar+pontuar+ordenar+cortar, `mais_frequentes`/`menos_frequentes`) + a orquestração específica de cada `estrategias/*.py`. Não viraram uma superclasse — cada flagship compõe as mesmas peças do núcleo à sua própria maneira |
-| `conferator/*` (11 classes) | Migrar (F4) | 🔲 | Conferência v2 — mais completa, vira o conferidor único |
-| `conferencia/*` (4 classes) | Arquivar | 🔲 | Conferência v1, superada por `conferator/*` |
-| `commons-loterias.controller.ConferirRN` | Corrigir e migrar (F4) | 🔲 | Bug: retorna `null` em concurso inexistente → NPE a jusante |
-| `commons-loterias.controller.Estatisticas` | Corrigir e migrar (F4) | 🔲 | Bug: possível `ArrayIndexOutOfBounds` em `calcularNumerosRepetidosSorteioAnterior` |
+| `conferator/*` (11 classes) | Migrar (F4) | ✅ | `nucleo/conferencia.py` — catálogo `PREMIACOES` (Lotofácil, Mega-Sena, Dupla Sena — as 3 únicas com conferidor no legado; Quina/Lotomania/Timemania/Bingo nunca tiveram) substitui as 11 classes |
+| `conferencia/*` (4 classes) | Arquivar | 🔲 | Conferência v1, superada por `conferator/*` (já migrado) |
+| `commons-loterias.controller.ConferirRN` | Corrigir e migrar (F4) | ✅ | `nucleo/conferencia.py::conferir_concurso/conferir_intervalo` — corrigido: levanta `ValueError` claro em vez de devolver `null`/lista com buraco |
+| `commons-loterias.controller.Estatisticas` | Corrigir e migrar (F4) | ✅ | `nucleo/estatistica.py::repeticao_entre_consecutivos` — corrigido: `Counter` em vez de array de tamanho fixo, não pode estourar. `calcularEstatisticasNumerosPorPosicao` (por posição) **não portado**: exige a ordem real de sorteio, que o formato canônico deste projeto não guarda (dezenas sempre ordenadas) — documentado como pendência, não omissão |
+| `lotomania.ContaAtrasosResultados` | Corrigir e migrar (F4) | ✅ | `nucleo/estatistica.py::atrasos` — **achado real:** era singleton com estado mutável compartilhado entre chamadas (corrompia resultados de históricos diferentes); aqui é função pura |
+| Backtest generalizado (visão do relatório original) | Migrar (F4) | ✅ | `nucleo/backtest.py` — harness walk-forward genérico, funciona com qualquer estratégia via injeção de função `gerar`; não é porta de código Java (não existia no legado) |
 | `lotomania.PontuadorMega*` vs `config.pontuador.PontuadorMega*` | Absorver | 🔲 | Duplicados em dois pacotes — manter 1 |
 
 ## 7. Núcleo combinatório e utilitários (ver também seção 08 do relatório — mapa de→para)
