@@ -105,16 +105,41 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 ## 6. Peças transversais (filtros, pontuadores, pós-processadores)
 
+> **Atualizado em 2026-09-12 (F2, primeira rodada):** filtros, pontuadores,
+> quadrantes/rotação e pool aleatório migrados para
+> `loterias-pro/loterias_pro/nucleo/` (repositório novo, ver
+> [README](../loterias-pro/README.md)), com 85 testes cobrindo os 3
+> módulos. Levantamento feito lendo o código Java linha a linha (não
+> resumo) — ver achados abaixo.
+>
+> **Achado crítico da F2:** `ConfigJogosComum.nrosJogos` tem um setter que
+> **nunca é chamado em lugar nenhum do projeto**. Consequência: em todos os
+> 7 geradores flagship lidos (`SuperLotofacil2026`, `SuperMega2025/2026`,
+> `QuinaQuadranteBaseN`, `SuperBingoDaSorte2024`, `GerarJogosDuplaSena2024`,
+> `LotomaniaFullPremiado`), o corte "top N jogos" (`subList(0,
+> config.getNrosJogos())`) sempre corta **top-1**, nunca o N configurado —
+> as constantes `QUANTIDADE_DE_JOGOS` controlam apenas o número de rodadas
+> do loop externo, cada uma produzindo exatamente 1 jogo. Adicionalmente,
+> `SuperLotofacil2026` (o flagship da Lotofácil) **nunca produz jogo
+> algum, como está escrito hoje** — os candidatos são gerados com 15
+> dezenas mas o filtro seguinte exige 16, descartando 100% dos candidatos
+> sempre. **Decisão registrada:** implementar o comportamento pretendido
+> (respeitar `nrosJogos` de verdade; corrigir o tamanho do pool da
+> Lotofácil) em vez de replicar os bugs — cada correção documentada no
+> código com referência ao comportamento antigo. Isso será aplicado na
+> próxima rodada da F2/F3, quando os 7 pipelines flagship forem portados
+> (esta rodada cobriu só as peças transversais que eles vão usar).
+
 | Componente | Destino | Status | Notas |
 |---|---|---|---|
-| 23 classes em `filtro/*` | Migrar (F2) | 🔲 | Cadeia de filtros — vira lista componível na plataforma nova |
-| ~45 classes de pontuador (`pontuador/*`, `config/pontuador/*`, `duplasena/*`, `pontuador/lotomania/*`) | Migrar (F2) | 🔲 | Tabelas acertos→pontos — viram dados de config, não código |
-| `ShiftBy` | Migrar (F2) | 🔲 | Pós-processador — shift circular |
+| 23 classes em `filtro/*` | Migrar (F2) | ✅ | `nucleo/filtros.py` — ~15 filtros distintos (2 pares eram equivalentes para parâmetros reais, colapsados). 3 bugs corrigidos: guard de tamanho invertido em `FiltroRemoverIntersecao` (era no-op no uso real mais comum); `FiltroMinimoColunas` com crescimento exponencial em vez de incremento; `FiltroMaxLista` rejeitando sempre quando `max<=0`. Estado `static` de `FiltroSubstituirUltimoSorteio` virou parâmetro de função (sem estado global) |
+| ~45 classes de pontuador (`pontuador/*`, `config/pontuador/*`, `duplasena/*`, `pontuador/lotomania/*`) | Migrar (F2) | 🟡 | `nucleo/pontuador.py` — motor genérico + catálogo com 10 tabelas portadas (Lotofácil ×5, Mega ×2, Lotomania ×5/8 já cobertas — as tabelas específicas de Quina/Dupla Sena/+Milionária/Timemania ficam para quando os respectivos flagships forem portados) |
+| `ShiftBy` | Migrar (F2) | ✅ | `nucleo/pool.py::aplicar_shift` — hardcode do legado (`shift=0` virava `26` fixo) corrigido com aritmética modular própria |
 | `ShiftByNew` | Arquivar | 🗄️ | Duplicata byte a byte de `ShiftBy` (movido para quarentena) |
-| `PositionalReplacement` | Migrar (F2) | 🔲 | Pós-processador — substituição posicional |
+| `PositionalReplacement` | Migrar (F2) | ✅ | `nucleo/pool.py::aplicar_substituicao_posicional` |
 | `PositionalReplacementNew` | Arquivar | 🗄️ | Duplicata byte a byte (movido para quarentena) |
-| `Quadrantes*` (Lotofácil/Mega/Quina/DuplaSena/Lotomania) + `Rotacao` | Migrar (F2) | 🔲 | Motor de geração por quadrantes — 1 implementação parametrizada por loteria |
-| `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2) | 🔲 | Superclasses comuns — viram a base do pipeline novo |
+| `Quadrantes*` (Lotofácil/Mega/Quina/DuplaSena/Lotomania) + `Rotacao` | Migrar (F2) | ✅ | `nucleo/quadrantes.py` — quadrantes fixos verificados linha a linha contra o Java (Dupla Sena confirmadamente irregular: 13/12/13/12); Lotomania calculada (fórmula par/ímpar de terminação). `Rotacao.getList` portado com simplificação de eficiência sem mudar distribuição (`rng.choice` em vez de embaralhar a lista inteira) |
+| `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2/F3) | 🔲 | Superclasses comuns — ficam para quando os pipelines dos 7 flagships forem portados (dependem de `nrosJogos` corrigido, ver achado acima) |
 | `conferator/*` (11 classes) | Migrar (F4) | 🔲 | Conferência v2 — mais completa, vira o conferidor único |
 | `conferencia/*` (4 classes) | Arquivar | 🔲 | Conferência v1, superada por `conferator/*` |
 | `commons-loterias.controller.ConferirRN` | Corrigir e migrar (F4) | 🔲 | Bug: retorna `null` em concurso inexistente → NPE a jusante |
@@ -134,7 +159,7 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 | `arquivo.ArquivoUtil` (715 linhas) | Corrigir e migrar (F2) | 🔲 | Bug: leitura cria arquivo/diretório se não existir; `\r\n` fixo na escrita vs. `line.separator` na leitura |
 | `download.ArquivoUtil` | Arquivar | 🔲 | Versão antiga, usada só por `ZipUtil` |
 | `ArquivoLeitorUtil` / `ArquivoEscritorUtil` | Migrar (F2) | 🔲 | Reescrita moderna (NIO, UTF-8) já existe — ironicamente pouco usada; deve virar a base |
-| `commons-loterias.util.ListUtil` (74 imports) | Corrigir e migrar (F2) | 🔲 | **Bug confirmado:** parâmetro `incluir` é ignorado em `completarExcluirIncluir` — decidir e registrar se a correção muda comportamento observável |
+| `commons-loterias.util.ListUtil` (74 imports) | Corrigir e migrar (F2) | ✅ | `nucleo/pool.py::completar_aleatorio` — **bug corrigido:** `incluir` agora funciona de verdade (o legado recebia o parâmetro e nunca o usava) |
 | `commons-loterias.util.ListUtil2` | Arquivar | 🗄️ | Versão antiga morta, contém loop vazio e possível loop infinito (movido para quarentena) |
 | `commons-core util.ListaUtils` | Absorver | 🔲 | `iterateStream` duplicado com `ListUtil` |
 | `commons-loterias.util.LotoUtil` | Arquivar | 🗄️ | Código morto — `maiorSequencia` retorna `null` (movido para quarentena) |
