@@ -26,7 +26,7 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 | Classe / FQN | Loteria | Destino | Status | Notas |
 |---|---|---|---|---|
-| `cliente.geradores.lotofacil.SuperLotofacil2026` | Lotofácil | Migrar (onda 1) | 🔲 | Flagship atual — pool 360k, filtro 9–12 vs. último sorteio, janela 150–900 |
+| `cliente.geradores.lotofacil.SuperLotofacil2026` | Lotofácil | Migrar (onda 1) | ✅ | `estrategias/lotofacil.py::super_lotofacil_2026` — **achado crítico:** como está escrito hoje, este gerador NUNCA produz jogo (pool gerado com 15 dezenas, filtro exige 16). Corrigido: pool gerado direto em 16, com fidelidade total ao resto do pipeline (9–12 vs. último sorteio, janela 150–900, elemento menos frequente excluído). Comportamento comprovado por teste (`test_produz_jogos_de_verdade`) |
 | `cliente.geradores.lotofacil.LotofacilInverte` | Lotofácil | Migrar (onda 1) | 🔲 | WIP não commitado — confirmar com o autor se está pronto p/ referência |
 | `cliente.geradores.lotofacil.LotofacilFullUIltimoConcursoQuadrante` | Lotofácil | Migrar (onda 3) | 🔲 | Foco em repetir 11 dezenas do último concurso |
 | `cliente.geradores.lotofacil.LotofacilUIltimoConcursoQuadrante` | Lotofácil | Absorver | 🔲 | Duplicata da linha acima (10 dezenas + rotação de configs) |
@@ -50,8 +50,8 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 | Classe / FQN | Destino | Status | Notas |
 |---|---|---|---|
-| `cliente.geradores.megasena.SuperMega2026` | Migrar (onda 1) | 🔲 | Bolão de 12 dezenas |
-| `cliente.geradores.megasena.SuperMega2025` | Migrar (onda 1) | 🔲 | 20 jogos de 6 dezenas |
+| `cliente.geradores.megasena.SuperMega2026` | Migrar (onda 1) | ✅ | `estrategias/megasena.py::super_mega_2026` — bolão de 12 dezenas. Corrigido: `nrosJogos` respeitado de verdade; ordem de cálculo incluir(menos frequentes)/excluir(mais frequentes) confirmada na fonte (a ordem inverte tudo se trocada) |
+| `cliente.geradores.megasena.SuperMega2025` | Migrar (onda 1) | ✅ | `estrategias/megasena.py::super_mega_2025` — 6 dezenas. Estruturalmente quase idêntico ao 2026 (mesma lógica incluir/excluir/"lasts"), difere no conjunto/ordem de filtros (sem checagem de superconjunto) e na tabela de pontos — lógica comum compartilhada via `_gerar_portfolio` para não duplicar |
 | `cliente.geradores.megasena.MegaFullLoopExcluirIncluirTopezaMaisDe6MaisMenos` | Migrar (onda 3) | 🔲 | Referência de `paths.md` — topeza + mais/menos |
 | `cliente.geradores.megasena.MegaLoopExcluirIncluirTopezaMaisDe5_bkp` | Arquivar | 🔲 | Backup explícito (`_bkp`) |
 | `cliente.geradores.megasena.MegaLoopExcluirIncluirTopezaSuper08` | Migrar (onda 2) | 🔲 | Variante sazonal/bolão |
@@ -65,7 +65,7 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 | Classe / FQN | Destino | Status | Notas |
 |---|---|---|---|
-| `cliente.geradores.quina.QuinaQuadranteBaseN` | Migrar (onda 1) | 🔲 | Versão mais limpa, referência de `paths.md` |
+| `cliente.geradores.quina.QuinaQuadranteBaseN` | Migrar (onda 1) | ✅ | `estrategias/quina.py::quina_quadrante_base_n` — janela cíclica de pontuação (0,50,0,100,...) confirmada na fonte; 25% de chance de inverter a ordem antes de cortar, preservado fielmente |
 | `cliente.geradores.quina.QuinaQuadranteBase2025N` | Migrar (onda 1) | 🔲 | WIP não commitado |
 | `cliente.geradores.quina.QuinaComBaseFixa` | Migrar (onda 1) | 🔲 | Referência de `paths.md` |
 | `cliente.geradores.quina.QuinaComBaseMovel` | Migrar (onda 1) | 🔲 | Base móvel |
@@ -81,7 +81,7 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 | Classe / FQN | Destino | Status | Notas |
 |---|---|---|---|
-| `cliente.lotomania.LotomaniaFullPremiado` | Migrar (onda 1) | 🔲 | Referência de `paths.md` — `PREMIADO=35` |
+| `cliente.lotomania.LotomaniaFullPremiado` | Migrar (onda 1) | ✅ | `estrategias/lotomania.py::lotomania_full_premiado` — pontua o "espelho" (complemento 0-99) e soma, cada jogo aceito produz 2 linhas (jogo+espelho). Corrigida a inconsistência de convenção numérica do legado (`fixInput` convertia "0"→"100" só em parte dos dados, nunca nos candidatos — aqui tudo é 0-99 de ponta a ponta) |
 | `cliente.lotomania.GerarLotomaniaMain` (+ `New`/`NewXTimes`/`Random`/`RandomXTimes`/`NewPremiados`) | Absorver | 🔲 | 6 variações incrementais → 1 componente parametrizado |
 | `cliente.frequencia.CalcularFrequenciaLotomania` | Migrar (onda 3) | 🔲 | Top/bottom por frequência — paths pessoais em `D:\Meus Documentos\` |
 | `cliente.temp.GerarEspelhosLotomanis`, `GerarJogoLotomaniaComplemento` | Migrar (onda 3) | 🔲 | Espelho/complemento 0–99 |
@@ -91,10 +91,10 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 
 | Classe / FQN | Loteria | Destino | Status | Notas |
 |---|---|---|---|---|
-| `cliente.geradores.duplasena.GerarJogosDuplaSena2024` | Dupla Sena | Migrar (onda 1) | 🔲 | Referência de `paths.md` |
+| `cliente.geradores.duplasena.GerarJogosDuplaSena2024` | Dupla Sena | Migrar (onda 1) | ✅ | `estrategias/dupla_sena.py::gerar_jogos_dupla_sena_2024` — confirmado na fonte: sem filtro de qualidade de jogo (só duplicata exata), e o cálculo de frequência (`mapAtuais`) é código morto — nunca usado para escolher `elements` (que é aleatório uniforme). Simplificação documentada: tabela de pontos fixa por execução (o legado cicla entre 4 configs/tabelas não levantadas ainda) |
 | `gerador.GerarJogosDuplaLoop` / `...EqualizaMaisMenos` | Dupla Sena | Absorver | 🔲 | |
 | `cliente.timemania.GerarJogosTimemaniaLoopExcluirIncluir10` | Timemania | Migrar (onda 3) | 🔲 | Único gerador — depende de F1 (fechar gap de histórico) |
-| `cliente.geradores.SuperBingoDaSorte2024` | Bingo da Sorte | Migrar (onda 1) | 🔲 | Referência de `paths.md` |
+| `cliente.geradores.SuperBingoDaSorte2024` | Bingo da Sorte | Migrar (onda 1) | ✅ | `estrategias/bingo_da_sorte.py::super_bingo_da_sorte_2024` — confirmado na fonte: `QuinaConfig10.getPontuador()` sorteia 50/50 entre duas tabelas A CADA CANDIDATO (não por rodada) — comportamento incomum mas real, replicado fielmente. Teto de tentativas GLOBAL (não por rodada), único flagship com essa característica |
 | `cliente.geradores.SuperBingoDaSorte2024Iterate` | Bingo da Sorte | Absorver | 🔲 | Duplicata (`QUANTIDADE_DE_JOGOS=1`) do item acima |
 | `cliente.geradores.SuperBingoDaSorte` | Bingo da Sorte | Arquivar | 🔲 | Superada pela versão 2024 |
 | `cliente.bingodasorte.gerador.GeradorGrupoBingoDaSorte` (+ variantes Novo/NovoComLista/Quadrante) | Bingo da Sorte | Absorver | 🔲 | Motor de 6 grupos temáticos — consolidar variantes num único motor parametrizado |
@@ -126,9 +126,19 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 > sempre. **Decisão registrada:** implementar o comportamento pretendido
 > (respeitar `nrosJogos` de verdade; corrigir o tamanho do pool da
 > Lotofácil) em vez de replicar os bugs — cada correção documentada no
-> código com referência ao comportamento antigo. Isso será aplicado na
-> próxima rodada da F2/F3, quando os 7 pipelines flagship forem portados
-> (esta rodada cobriu só as peças transversais que eles vão usar).
+> código com referência ao comportamento antigo.
+>
+> **Atualizado em 2026-09-17 (F3, onda 1 completa):** os 7 geradores
+> flagship foram portados para `loterias-pro/loterias_pro/estrategias/`,
+> cada um lido linha a linha na fonte antes de portar — ver as linhas
+> correspondentes nas seções 1–5 acima. `nrosJogos` agora é
+> `jogos_por_rodada`, um parâmetro real, em todos os 7; o pool da Lotofácil
+> é gerado direto no tamanho final (16), corrigindo o bug que fazia
+> `SuperLotofacil2026` nunca produzir jogo (comprovado por teste). Outro
+> achado real (não estava no levantamento original): `FiltroRemoverIntersecao`
+> tem o guard de tamanho invertido no Java, tornando-o um no-op exatamente
+> no caso de uso mais comum (candidato maior que o histórico) — corrigido
+> em `nucleo/filtros.py::remover_intersecao`. 199 testes no total.
 
 | Componente | Destino | Status | Notas |
 |---|---|---|---|
@@ -139,7 +149,7 @@ Legenda de status: 🔲 Pendente · 🟡 Em andamento · 🗄️ Em quarentena (
 | `PositionalReplacement` | Migrar (F2) | ✅ | `nucleo/pool.py::aplicar_substituicao_posicional` |
 | `PositionalReplacementNew` | Arquivar | 🗄️ | Duplicata byte a byte (movido para quarentena) |
 | `Quadrantes*` (Lotofácil/Mega/Quina/DuplaSena/Lotomania) + `Rotacao` | Migrar (F2) | ✅ | `nucleo/quadrantes.py` — quadrantes fixos verificados linha a linha contra o Java (Dupla Sena confirmadamente irregular: 13/12/13/12); Lotomania calculada (fórmula par/ímpar de terminação). `Rotacao.getList` portado com simplificação de eficiência sem mudar distribuição (`rng.choice` em vez de embaralhar a lista inteira) |
-| `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2/F3) | 🔲 | Superclasses comuns — ficam para quando os pipelines dos 7 flagships forem portados (dependem de `nrosJogos` corrigido, ver achado acima) |
+| `gerador.Base`, `GerarJogosBase`, `GerarJogosDuplaBase` | Migrar (F2/F3) | ✅ | Absorvidas: `nucleo/selecao.py` (filtrar+pontuar+ordenar+cortar, `mais_frequentes`/`menos_frequentes`) + a orquestração específica de cada `estrategias/*.py`. Não viraram uma superclasse — cada flagship compõe as mesmas peças do núcleo à sua própria maneira |
 | `conferator/*` (11 classes) | Migrar (F4) | 🔲 | Conferência v2 — mais completa, vira o conferidor único |
 | `conferencia/*` (4 classes) | Arquivar | 🔲 | Conferência v1, superada por `conferator/*` |
 | `commons-loterias.controller.ConferirRN` | Corrigir e migrar (F4) | 🔲 | Bug: retorna `null` em concurso inexistente → NPE a jusante |
